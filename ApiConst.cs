@@ -38,7 +38,7 @@ namespace MinimalApi
     }
     public class JwtToken
     {
-        public string EmployeeId { get; set; }
-        public string Password { get; set; }
+        public string? EmployeeId { get; set; }
+        public string? Password { get; set; }
     }
 }

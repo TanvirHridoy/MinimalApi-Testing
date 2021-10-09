@@ -73,6 +73,6 @@ var app = builder.Build();
     app.MapGet("/api/Dept",[Authorize] async (CertificateMSContext _Db ) =>   await _Db.Departments.ToListAsync());
 
       //Using fluid Authorization assignment
-    app.MapGet("/api/Deptt", async (CertificateMSContext _Db) => await _Db.Departments.ToListAsync()).RequireAuthorization();
+    app.MapGet("/api/Campus", async (CertificateMSContext _Db) => await _Db.Campuses.ToListAsync()).RequireAuthorization();
 //apies end 
 app.Run();
