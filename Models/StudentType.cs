@@ -6,6 +6,6 @@ namespace MinimalApi.Models
     public partial class StudentType
     {
         public int Id { get; set; }
-        public string Type { get; set; } = null!;
+        public string? Type { get; set; }
     }
 }

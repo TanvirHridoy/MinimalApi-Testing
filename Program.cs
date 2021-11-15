@@ -10,9 +10,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //Configure Services starts 
-    builder.Services.AddDbContext<CertificateMSContext>(o =>
-        o.UseSqlServer(builder.Configuration.GetConnectionString("CertificateDb")));
-    builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDbContext<CertificateMSV2Context>(o =>
+    o.UseSqlServer(builder.Configuration.GetConnectionString("CertificateDb")));
+builder.Services.AddEndpointsApiExplorer();
 #region Swagger authorization config     
 //builder.Services.AddSwaggerGen(x => 
 //{
@@ -69,10 +69,10 @@ var app = builder.Build();
 //apies
     app.MapPost("/api/Jwt", (JwtToken model) => ApiConst.CreateToken(model)).AllowAnonymous();
 
-       //Authoriztion using attributes
-    app.MapGet("/api/Dept",[Authorize] async (CertificateMSContext _Db ) =>   await _Db.Departments.ToListAsync());
+//Authoriztion using attributes
+    app.MapGet("/api/Dept", [Authorize] async (CertificateMSV2Context _Db) => await _Db.Departments.ToListAsync());
 
-      //Using fluid Authorization assignment
-    app.MapGet("/api/Campus", async (CertificateMSContext _Db) => await _Db.Campuses.ToListAsync()).RequireAuthorization();
+//Using fluid Authorization assignment
+app.MapGet("/api/Campus", async (CertificateMSV2Context _Db) => await _Db.Campuses.ToListAsync()).RequireAuthorization();
 //apies end 
 app.Run();
