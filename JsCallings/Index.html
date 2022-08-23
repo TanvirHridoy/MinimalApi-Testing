@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail Sender</title>
+</head>
+<body>
+    <div>
+        <input type="email" id="email"/>
+        <input type="text" id="Name"/>
+        <button type="button"  onclick="btnclick()">Click here</button>
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+
+        const userAction = async (email,name) => {
+            
+        const response = await fetch('http://kmhridoy1997-001-site1.itempurl.com/api/Mail/'+email+'/'+name, {
+            method: 'Get',
+            //body: myBody, // string or object
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        });
+        var statuscode= await response.status;
+        if( statuscode==200){
+            const myJson = await response.json();
+            alert(myJson);
+        }
+        else{
+            alert('Failed to send email');
+        }
+         //extract JSON from the http response
+        
+        }
+        function btnclick(){
+            var email=$('#email').val();
+            var Name=$('#Name').val();
+            userAction(email,Name);
+        }
+        
+    </script>
+</body>
+</html>
