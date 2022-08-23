@@ -1,16 +1,23 @@
 using AspNetCoreRateLimit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using MinimalApi;
 using MinimalApi.Models;
-using Newtonsoft.Json;
 using System.Text;
 
+string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("_myAllowSpecificOrigins",
+     builder => builder
+     .AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+        );
+});
 //Configure Services starts 
 builder.Services.AddOptions();
 builder.Services.AddMemoryCache();
@@ -84,8 +91,8 @@ builder.Services.AddInMemoryRateLimiting();
 //builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
 //builder.Services.AddInMemoryRateLimiting();
 
-builder.Services.AddDbContext<CertificateMSV2Context>(o =>
-    o.UseSqlServer(builder.Configuration.GetConnectionString("CertificateDb")));
+//builder.Services.AddDbContext<CertificateMSV2Context>(o =>
+//    o.UseSqlServer(builder.Configuration.GetConnectionString("CertificateDb")));
 builder.Services.AddEndpointsApiExplorer();
 #region Swagger authorization config     
 //builder.Services.AddSwaggerGen(x => 
@@ -138,6 +145,8 @@ var app = builder.Build();
 app.UseIpRateLimiting();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors(MyAllowSpecificOrigins);
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 //Configure ends
@@ -146,16 +155,32 @@ app.UseAuthorization();
 
 app.MapGet("/api/Test", () => "Hello Test!");
 
-app.MapGet("/api/Test2", () => "Hello Test2! MapGet");
-app.MapPost("/api/Test2", () => "Hello Test2! MapPost");
-app.MapPut("/api/Test2", () => "Hello Test2! MapPut");
-app.MapDelete("/api/Test2", () => "Hello Test2! MapDelete");
 app.MapPost("/api/Jwt", (JwtToken model) => ApiConst.CreateToken(model)).AllowAnonymous();
 
-//Authoriztion using attributes
-app.MapGet("/api/Dept", [Authorize] async (CertificateMSV2Context _Db) => await _Db.Departments.ToListAsync());
+//Api To send Mail
+app.MapGet("/api/Mail/{MailAddress}/{Name}", async (string MailAddress, string Name) =>
+{
+    MailAccountInfo accountInfo = new MailAccountInfo();
+    builder.Configuration.GetSection("MailConfig").Bind(accountInfo);
+    Random rand = new Random();
+    string Otp = rand.Next(111111, 999999).ToString();
 
-//Using fluid Authorization assignment
-app.MapGet("/api/Campus", async (CertificateMSV2Context _Db) => await _Db.Campuses.ToListAsync()).RequireAuthorization();
+    MailHelper helper = new MailHelper();
+    var result = await Task.Run(() => helper.SendEmail(Otp, accountInfo, Name, MailAddress));
+    if (result)
+    {
+        return Results.Ok(Otp);
+    }
+    else
+    {
+        return Results.BadRequest();
+    }
+}).AllowAnonymous();
+
+////Authoriztion using attributes
+//app.MapGet("/api/Dept", [Authorize] async (CertificateMSV2Context _Db) => await _Db.Departments.ToListAsync());
+
+////Using fluid Authorization assignment
+//app.MapGet("/api/Campus", async (CertificateMSV2Context _Db) => await _Db.Campuses.ToListAsync()).RequireAuthorization();
 //apies end 
 app.Run();
