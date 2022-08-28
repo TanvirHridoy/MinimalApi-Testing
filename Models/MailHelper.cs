@@ -9,6 +9,8 @@ namespace MinimalApi.Models
         public string EmailAddress { get; set; }
         public string FromName { get; set; }
         public string Password { get; set; }
+        public int Port { get; set; }
+        public bool EnableSSL { get; set; }
     }
     public class MailHelper
     {
@@ -23,11 +25,11 @@ namespace MinimalApi.Models
                 m.Body = string.Format($"Dear {ToName} <BR/>Your verification Code is {otp} ");
                 m.IsBodyHtml = true;
 
-                SmtpClient smtp = new SmtpClient(accountInfo.host);
+                SmtpClient smtp = new SmtpClient();
                 smtp.Credentials = new System.Net.NetworkCredential(accountInfo.EmailAddress, accountInfo.Password);
-                smtp.EnableSsl = true;
+                smtp.EnableSsl = accountInfo.EnableSSL;
                 smtp.UseDefaultCredentials = false;
-                smtp.Port = 587;
+                smtp.Port = accountInfo.Port;
                 smtp.Send(m);
                 return true;
             }
